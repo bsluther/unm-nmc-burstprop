@@ -1,0 +1,38 @@
+[project]
+name = "unm-nmc-burstprop"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Brian Luther", email = "briansluther@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "norse",
+    "numpy>=2.5.3",
+    "omegaconf>=2.3.1",
+    "pandas>=3.0.5",
+    "tensorboard>=2.21.0",
+    "torch>=2.14.0",
+    "torchvision>=0.29.0",
+    "tqdm>=4.70.1",
+]
+
+[project.scripts]
+unm-nmc-burstprop = "unm_nmc_burstprop:main"
+
+[build-system]
+requires = ["uv_build>=0.11.17,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+norse = { git = "https://github.com/norse/norse", rev = "e4a273b05aee28ad599141ad79baf13d4ed090a5" }
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.3.0",
+    "jupyterlab>=4.6.3",
+    "pytest>=9.1.1",
+    "ruff>=0.16.7",
+]
