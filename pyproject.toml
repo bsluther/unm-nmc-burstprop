@@ -30,9 +30,6 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = ["unm_nmc_burstprop", "burstlab"]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]  # learning exercises are run explicitly by path
-
 [tool.uv.sources]
 norse = { git = "https://github.com/norse/norse", rev = "e4a273b05aee28ad599141ad79baf13d4ed090a5" }
 

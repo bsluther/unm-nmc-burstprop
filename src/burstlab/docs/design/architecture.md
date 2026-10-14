@@ -126,9 +126,8 @@ batch 1 natively in real time. Batching is how we emulate that cheaply on a CPU 
 Claude builds the infrastructure (simulator loop, probes, configs, data and encoders) and **writes the tests
 first**. The students implement the core pieces against those tests:
 
-- the rate-model Burstprop exercise (phase 1; a learning exercise in `learning/`, not project infrastructure);
-- the two-compartment neuron step and the burst generator (phase 2);
-- the plasticity rule (phases 2–3).
+- the two-compartment neuron step and the burst generator (phase 1);
+- the plasticity rule (phases 1–2).
 
 Each core piece comes with a short explainer and the tests that define it. Claude reviews.
 
@@ -140,11 +139,11 @@ offsetting measure upfront would bloat the project and hide the core idea. Each 
 | Mitigation | Add when |
 |---|---|
 | Tiny framework, paper vocabulary (`soma`, `dendrite`, `events`, `bursts`, `delay`); plain dataclasses and functions, no registries or metaclasses | Always. It's a style rule and costs nothing |
-| Hand-written reference loop for the paper's 1-hidden-layer network, plus an exact-equivalence test (same seed → same result) against the generic simulator. It's also the entry point for new readers | Phase 3, written *before* the generic simulator, which then generalizes it |
+| Hand-written reference loop for the paper's 1-hidden-layer network, plus an exact-equivalence test (same seed → same result) against the generic simulator. It's also the entry point for new readers | Phase 2, written *before* the generic simulator, which then generalizes it |
 | `net.describe()`: prints the wiring as a table | When the first non-stack topology lands (DFA, skip) |
-| Overhead benchmark: generic simulator vs. reference loop | Before the first large sweep (phase 5) |
+| Overhead benchmark: generic simulator vs. reference loop | Before the first large sweep (phase 4) |
 | `torch.compile`; fusing connections that share a target compartment | Only if the benchmark shows a need |
-| Periodic or best-so-far checkpoints, resuming runs | When runs get long enough to need them (phase 3 spiking runs) |
+| Periodic or best-so-far checkpoints, resuming runs | When runs get long enough to need them (phase 2 spiking runs) |
 | `.pt` snapshots of internal quantities (burst probabilities, update directions) | When a concrete analysis needs them |
 | TensorBoard | When we want to watch runs live |
 
@@ -160,9 +159,6 @@ When you're tempted to add something not on this list, add a row with its trigge
   - low-resolution weights stay on the grid, with |accumulator| < ε/2 (§3.6 of the paper);
   - any generated wiring produces a valid execution order;
   - batched and faithful modes agree on the expected ΔW.
-
-  Assessed for phase 1: not a fit. The properties involve continuous tensors, Hypothesis has no built-in torch
-  strategies, and seed-parametrized pytest covers the same ground.
 - **External simulators as single-neuron oracles.** Brian2 can express the two-compartment neuron with custom
   equations and `rand()` in its reset code. Gotchas:
   - pass `method='euler'` to match our integrator (Brian2 otherwise picks exact integration for linear equations);
@@ -178,7 +174,7 @@ src/burstlab/            # this track; sibling of src/unm_nmc_burstprop/ (explor
   docs/design/           # project documents: this file, replication-notes.md, reference-simulators.md
   learning/              # human learning material; not a project document or source of facts
   ...                    # code subpackages are added per phase
-tests/burstlab/          # added in phase 2, mirroring tests/norse/ (the phase 1 exercise keeps its tests in learning/)
+tests/burstlab/          # added in phase 1, mirroring tests/norse/
 ```
 
 Shared, repo-level resources stay where they are: `docs/papers/`, `docs/norse/`, `tests/norse/`.
@@ -187,40 +183,36 @@ Shared, repo-level resources stay where they are: `docs/papers/`, `docs/norse/`,
 
 Each phase gets its own plan and review.
 
-1. **Rate-model Burstprop exercise** (Payeur 2021, Methods eqs. 7–9), in `learning/rate_burstprop/`. A short
-   learning exercise, not infrastructure: five functions written by the students, tests comparing them against
-   autograd, and a small MNIST script. It's scoped down because Payeur's rate model is a different model from
-   Stuck's spiking network (two explicit passes, exact f′, no spiking noise), so its code and debugging lessons
-   don't carry over. For a noise-free reference in the spiking work, see the expected-value idea in §12.
-2. **Single two-compartment spiking neuron.** Reproduce Stuck Fig. 2: a sinusoidal dendritic potential → burst
+1. **Single two-compartment spiking neuron.** Reproduce Stuck Fig. 2: a sinusoidal dendritic potential → burst
    probabilities, burst trains, eligibility trace, ΔW, for both the signed and unsigned models. Norse oracle for
    the soma and dendrite. Sign-convention test (replication notes §1).
-3. **Spiking MNIST.** Reference loop first, then the explicit-wiring simulator and the equivalence test. 1×100
+2. **Spiking MNIST.** Reference loop first, then the explicit-wiring simulator and the equivalence test. 1×100
    hidden layer, symmetric feedback. Targets 97.2% / 96.8%.
-4. **BPTT baseline** with Norse `LIFBox` on the same architecture. Target 97.7%.
-5. **Paper sweeps.** Depth and width (Fig. 3A), weight freezing (3B), FA/DFA (Fig. 4), low-resolution weights
+3. **BPTT baseline** with Norse `LIFBox` on the same architecture. Target 97.7%.
+4. **Paper sweeps.** Depth and width (Fig. 3A), weight freezing (3B), FA/DFA (Fig. 4), low-resolution weights
    (Fig. 5), sparsity (Table 1), EMNIST/FMNIST. Run the overhead benchmark first.
+
+A rate-model Burstprop exercise (Payeur 2021) was tried as a first phase and dropped, to keep the focus on one
+model: the spiking one. It's preserved in git history at commit `01f8121`.
 
 ## 10. Applying updates: the pure rule by default
 
 **Decision.** Plasticity rules apply their update directly: `W += ΔW`, with the learning rate inside the rule.
-There's no momentum and no weight decay. This holds for the phase 1 exercise and is the starting point for
-spiking plasticity in phase 3, which decides afresh how spiking updates are applied.
+There's no momentum and no weight decay. This is the starting point for spiking plasticity; phase 2 decides
+afresh how spiking updates are applied.
 
 **Considered and set aside: Burstprop as a gradient estimator.** That means storing the update in `.grad` and
 applying it with `torch.optim`. Its advantages: an identical optimizer for the backprop comparison, standard
 tooling, and direct `.grad` comparisons. Why we didn't take it:
 
-- It presumes what we're testing (that the update approximates a gradient). The scale isn't the gradient's in any
-  case: in the rate model it's about `p_baseline · (1/4)^k ×` the gradient for a layer k steps below the output.
+- It presumes what we're testing (that the update approximates a gradient).
 - It hides the update rule inside the optimizer.
 - It invites optimizers that break locality.
 
 **Momentum changes the learning dynamics.** It's local: each synapse keeps a decaying trace of its own recent
 updates. But that trace is an extra per-synapse state variable with its own time constant, and it isn't in Stuck's
 rule. It also averages noisy updates over time, so part of any success would be due to it. It's available only as
-an explicit, labelled experiment, never as a default. Payeur's rate code uses momentum 0.8; keep that in mind when
-comparing with their numbers.
+an explicit, labelled experiment, never as a default.
 
 **Locality rule for optimizers.** Any optimizer used with a local rule must update each synapse using only that
 synapse's own history. SGD and momentum qualify; Adam does too, though it's biologically odd. Gradient clipping by
@@ -240,8 +232,7 @@ runs/<name>/<timestamp>/
 Why: JSONL is appended line by line, so a crashed run keeps its history. It's readable in any editor and loads with
 `pd.read_json(path, lines=True)`. `.pt` holds tensors and state, not scalar histories. Saving plain `state_dict`s
 (not pickled objects) keeps loading safe. More outputs are staged in §6. `runs/` and `data/` (dataset downloads) are
-git-ignored. The phase 1 exercise prints to the terminal instead; this layout starts with the phase 2–3
-infrastructure.
+git-ignored. This layout starts with the phase 1–2 infrastructure.
 
 ## 12. Ideas we could try (not planned)
 
