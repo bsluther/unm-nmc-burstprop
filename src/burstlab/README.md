@@ -11,7 +11,8 @@ from this package.
 
 ## Status
 
-Planning is done, and the design docs are written. There's no code yet. Phase 1 (rate-model Burstprop) is next.
+Phase 1, the rate-model exercise, is ready in [`learning/rate_burstprop/`](learning/rate_burstprop/) for the
+students to implement. Phase 2 (single spiking neuron) is next.
 
 ## Reading order
 
@@ -23,7 +24,7 @@ Planning is done, and the design docs are written. There's no code yet. Phase 1 
 
 ## Phases
 
-1. Rate-model Burstprop (Payeur 2021), checked against autograd gradients
+1. Rate-model Burstprop exercise (Payeur 2021), checked against autograd gradients (learning material)
 2. Single two-compartment spiking neuron (Stuck Fig. 2)
 3. Spiking MNIST: hand-written reference loop, then the explicit-wiring simulator
 4. BPTT baseline (Norse)

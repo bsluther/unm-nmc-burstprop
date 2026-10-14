@@ -9,6 +9,10 @@ wheels/
 # Virtual environments
 .venv
 
+# Datasets and run outputs
+data/
+runs/
+
 # macOS
 .DS_Store
 
