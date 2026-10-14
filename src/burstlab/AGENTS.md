@@ -23,10 +23,10 @@ teaching, so don't rely on it for facts, specs, or decisions. You may edit it wh
 
 - **Scope.** This track's code, tests, and docs live in `src/burstlab/` and `tests/burstlab/`. Don't modify
   `src/unm_nmc_burstprop/` (another track) without asking.
-- **Work split.** The core pieces belong to the students: the two-compartment neuron step, the burst generator,
-  the plasticity rule. For these, write the tests and a short explainer, then **review**. Don't implement them
-  unless asked, and don't commit solutions to them. Infrastructure (simulator loop, probes, configs, data and
-  encoders) is Claude's to build.
+- **Work split.** The core pieces belong to the students: the two-compartment neuron step, the burst generator
+  (`bursts.py`), the trace (`traces.py`), the plasticity rule (`plasticity.py`). For these, write the tests and a
+  short explainer, then **review**. Don't implement them unless asked, and don't commit solutions to them.
+  Infrastructure (simulator loop, probes, configs, data and encoders) is Claude's to build.
 - **Staged mitigations.** Only add the features and safeguards in architecture §6 when their trigger arrives. When
   something new seems worth adding, propose a row (with its trigger) for that table instead of building it now.
 - **Testing tools.** Hypothesis and external-simulator oracles (Brian2) are noted in architecture §7. Propose

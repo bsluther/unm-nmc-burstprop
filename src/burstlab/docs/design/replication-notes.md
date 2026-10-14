@@ -34,7 +34,9 @@ epochs, BPTT for 200.
 - **[derived]** Eqs. 9, 13, and 14 are consistent with each other and implement gradient descent. If a rate is below
   target, T < 0, so Ṽ_d < 0, which gives negative bursts (signed) or fewer bursts (unsigned), and the weights grow.
   Only the product of signs along the chain matters.
-- **Action:** pick one convention and pin it with a test: *an output rate below target ⇒ its incoming weights grow*.
+- **Decision:** we use Payeur's convention (bursts potentiate). T, R, and the rule each carry the opposite sign
+  from Stuck's printed eqs. 9, 10, 13, and 14 (architecture §12). A test pins it: *a positive burst with a positive
+  presynaptic trace strengthens the synapse*, and later, *an output rate below target ⇒ its incoming weights grow*.
 
 ## 2. The unsigned model leaks a baseline into hidden dendrites
 
@@ -70,6 +72,9 @@ epochs, BPTT for 200.
   `docs/norse/stuck2025-api-map.md`.
 - **[paper]** The plasticity rules are written as dw/dt (eqs. 13–14) with η = 10⁻⁴. Whether η is applied per step
   or multiplied by dt is not stated.
+- **Decision (traces):** a spike counts as a pulse of height 1/dt, so traces (Ẽ, Ē) are in Hz and a steady r Hz
+  neuron's trace averages r (`traces.trace_step`). This matches the paper's targets in Hz (§3.4). The η question is
+  still open.
 - **Impact:** both choices set the scale at which weights, initialization, γ_T, γ_R, and η compare with the paper.
   Record each choice where it's made.
 

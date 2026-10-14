@@ -234,7 +234,26 @@ Why: JSONL is appended line by line, so a crashed run keeps its history. It's re
 (not pickled objects) keeps loading safe. More outputs are staged in §6. `runs/` and `data/` (dataset downloads) are
 git-ignored. This layout starts with the phase 1–2 infrastructure.
 
-## 12. Ideas we could try (not planned)
+## 12. Sign convention: bursts potentiate
+
+**Decision.** A positive dendritic potential and a positive burst mean *"increase my rate"*. Bursts carry the
+negative loss gradient (the error, target − rate), and a burst paired with presynaptic activity strengthens the
+synapse:
+
+$$
+T_i = +2\gamma_T\,(\hat{E}_i - \bar{E}_i), \qquad R_i = +2\gamma_R\,(\hat{E} - \bar{E}_i), \qquad
+\Delta w_{ij} = +\eta\,\tilde{E}_j\,(\hat{B}^+_i - \hat{B}^-_i)
+$$
+
+and, for the unsigned model, $\Delta w_{ij} = +\eta\,\tilde{E}_j\,(\hat{B}_i - B_P S_i)$.
+
+**Why.** Stuck's printed equations (9, 10, 13, 14) put the minus sign in the plasticity rule instead: bursts carry
+$+\partial L/\partial \bar{E}$ and a positive burst weakens the synapse. Both train identically. We chose
+Payeur's convention because it matches the biology (burst-dependent LTP), Stuck's own prose under eq. 14, and the
+easier mental model. **Cost:** T, R, and the rule each differ from Stuck's printed equations by one minus sign.
+See replication notes §1.
+
+## 13. Ideas we could try (not planned)
 
 These are ideas to remember, not commitments. Each needs its own discussion before anyone builds it.
 

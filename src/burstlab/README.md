@@ -11,8 +11,15 @@ from this package.
 
 ## Status
 
-Planning is done, and the design docs are written. There's no code yet. Phase 1 (single two-compartment spiking
-neuron) is next.
+Phase 1 (single two-compartment spiking neuron), step 1: reproduce Stuck Fig. 2. The skeletons in `bursts.py`,
+`traces.py` and `plasticity.py` are for the students to implement, against `tests/burstlab/`:
+
+```bash
+uv run pytest tests/burstlab -q              # fails until the skeletons are implemented
+uv run python -m burstlab.experiments.fig2   # then: writes runs/fig2.png
+```
+
+Step 2 is the full neuron step (LIF soma, leaky dendrite, bursting, dendritic reset), checked against Norse.
 
 ## Reading order
 
