@@ -31,6 +31,10 @@ epochs, BPTT for 200.
 - **[paper]** The prose under eq. 14 says: for the unsigned model, negative weight changes happen on postsynaptic
   spikes and positive changes on postsynaptic bursts. That's the opposite of eq. 14 as written, and matches
   Payeur's convention (P-eq. 1, no leading minus).
+- **[paper]** Fig. 2F shows positive weight changes while Ṽ_d > 0 (Fig. 2A) and negative ones while Ṽ_d < 0, in
+  both models.
+- **[derived]** So Fig. 2 was made with bursts potentiating: consistent with the prose and with our decision below,
+  not with eqs. 13–14 as printed.
 - **[derived]** Eqs. 9, 13, and 14 are consistent with each other and implement gradient descent. If a rate is below
   target, T < 0, so Ṽ_d < 0, which gives negative bursts (signed) or fewer bursts (unsigned), and the weights grow.
   Only the product of signs along the chain matters.
@@ -74,7 +78,14 @@ epochs, BPTT for 200.
   or multiplied by dt is not stated.
 - **Decision (traces):** a spike counts as a pulse of height 1/dt, so traces (Ẽ, Ē) are in Hz and a steady r Hz
   neuron's trace averages r (`traces.trace_step`). This matches the paper's targets in Hz (§3.4). The η question is
-  still open.
+  still open; Fig. 2 bears on it (next items).
+- **[paper]** Fig. 2E: the eligibility trace jumps by about 1 per presynaptic event (peaks ≈ 1–2.5 for ~50 Hz input)
+  and decays with τ ≈ 10 ms. Fig. 2F: individual weight changes are ≈ 2–9 × 10⁻⁵.
+- **[derived]** That fits a trace that jumps by 1 per event (our Hz trace × τ) and an update applied once per
+  event: Δw ≈ η × trace × (burst term) ≈ 10⁻⁴ × 1 × 0.5 = 5 × 10⁻⁵. Multiplying by dt as well would give ~10⁻⁸.
+  With our Hz trace, the same updates need η ≈ 10⁻⁴ × τ = 10⁻⁶.
+- **[hypothesis]** The MNIST experiments use the same trace scale and η convention as Fig. 2. Check against
+  training stability once the network runs; the figure may have been made separately.
 - **Impact:** both choices set the scale at which weights, initialization, γ_T, γ_R, and η compare with the paper.
   Record each choice where it's made.
 

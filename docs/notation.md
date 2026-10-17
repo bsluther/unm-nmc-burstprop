@@ -4,10 +4,16 @@ AI DISCLOSURE: this file was not written by AI and should not be without express
 
 A compilation of the notation used in this project. Most notation is taken from [Stuck 2025](./papers/stuck2025.pdf) and [Payeur 2021](./papers/payeur2021.pdf) but some modifications have been made for consistency, clarity, or to resolve apparent ambiguities or mistakes.
 
+### Eligibility trace dynamics
+$\tau_{\overline E} \dfrac {d\overline E_j(t)}{dt} = -\overline E_j(t) + S_j(t) \qquad (\text{equation 4})$
+- How the eligibility trace evolves over time.
+- See the section on the event train $S_i(t)$ for more details.
+- The effect of this differential equation is to take an exponential moving average of the event train.
+
 ### Spikes, bursts, and events
 $\overline E_j:$ the rate estimate of neuron $j$. Equivalent to the eligibility trace $\tilde E_j$. (Stuck 2025, p5)
+- Stuck has a misplaced comma at the top of p5 which makes it look like this is the event train, it's not!
 <br/><br/>
-
 
 $S_i(t) = \displaystyle\sum_k \delta (t-t_k^{(i)}):$ the event train of neuron $i$, a function of continuous time $t$. The event train tells us the times at which neuron $i$ emitted an event. 
 - Here $t_k^{(i)}$ is the *time* of the $k$-th event from neuron $i$. Payeur calls this $t_{i,event}$.
@@ -18,6 +24,8 @@ $S_i(t) = \displaystyle\sum_k \delta (t-t_k^{(i)}):$ the event train of neuron $
 - Payeur calls the event train $E_i(t)$ and uses $S_i(t)$ for the spike train. I like that notation better (E is for event, lines up with the eligibility trace and rate estimate) but I'm hesitant to diverge from Stuck's notation.
 <br/><br/>
 
+$\hat B_j(t):$ burst train of neuron $j$.
+
 $P_{B+} = \max (0, \tanh(V_d)):$ probability of a positive burst in the signed burst model.
 
 $P_{B-} = \max (0, -\tanh(V_d)):$ probability of a negative burst in the signed burst model.. 
@@ -27,7 +35,8 @@ $B_P = 0.5:$ baseline burst probability in Stuck's model. Payeur's analogue is $
 
 
 ### Time constants
-$\tau_{\tilde E}:$ the eligibility trace time constant. (Stuck 2025, p5)
+$\tau_{\overline E}:$ the eligibility trace time constant. (Stuck 2025, p5)
+
 - Stuck 2025 uses 10ms.
 <br/><br/>
 

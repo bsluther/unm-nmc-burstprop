@@ -1,6 +1,6 @@
 """Burst generation: which somatic events become bursts (Stuck et al. 2025, §3.1.4; Fig. 2B, D).
 
-AI DISCLOSURE: this header and function signautres were written by Claude Opus. The function bodies
+AI DISCLOSURE: this header and function signatures were written by Claude Opus. The function bodies
 and docstrings were human authored.
 
 The soma decides *whether* an event happens. The dendrite decides whether that event is a burst.

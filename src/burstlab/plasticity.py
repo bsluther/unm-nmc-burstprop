@@ -20,24 +20,26 @@ How eta relates to the paper's eta = 1e-4 (per step or per second, and with trac
 (replication notes §5). These functions just multiply by whatever eta they're given.
 """
 
+import torch
 from torch import Tensor
 
 
-def signed_rule(
-    pre_trace: Tensor, bursts_plus: Tensor, bursts_minus: Tensor, eta: float
-) -> Tensor:
+def signed_rule(pre_trace: Tensor, bursts_plus: Tensor, bursts_minus: Tensor, eta: float) -> Tensor:
     """Signed model:  dW[i, j] = eta * mean over batch of (B+_i - B-_i) * E~_j.
 
     A positive burst strengthens every synapse onto that neuron in proportion to how active its presynaptic
     neuron has been. A negative burst weakens them. No burst, no change.
     """
-    raise NotImplementedError
+    a = bursts_plus - bursts_minus
+    b = eta * pre_trace
+    batch_size = pre_trace.shape[0]
+    return (a.T @ b) / batch_size
 
 
 def unsigned_rule(
-    pre_trace: Tensor,
-    bursts: Tensor,
-    events: Tensor,
+    pre_trace: Tensor,  # (batch, n_pre) presynaptic eligibility trace
+    bursts: Tensor,  # (batch, n_post) burst train
+    events: Tensor,  # (batch, n_post) event train
     eta: float,
     p_baseline: float = 0.5,
 ) -> Tensor:
@@ -49,4 +51,12 @@ def unsigned_rule(
     When events burst with probability p_baseline, these cancel on average. p_baseline = 0.5 = sigmoid(0) matches
     the burst probability of a dendrite at rest.
     """
-    raise NotImplementedError
+    a = bursts - p_baseline * events  # (batch, n_post)
+    b = eta * pre_trace  # (batch, n_pre)
+
+    # For each batch we want the outer product. It's mind-warpy to think about the batched version,
+    # but apparently it works out as:
+    # a.t @ b -> (n_post, batch) * (batch, n_pre) = (n_post, n_pre) which matches the weight matrix.
+    # That gives the sum over the batch so divide by the batch size to get the average over batches.
+    batch_size = pre_trace.shape[0]
+    return (a.T @ b) / batch_size
