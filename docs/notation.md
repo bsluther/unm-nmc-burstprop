@@ -4,7 +4,7 @@ AI DISCLOSURE: this file was not written by AI and should not be without express
 
 A compilation of the notation used in this project. Most notation is taken from [Stuck 2025](./papers/stuck2025.pdf) and [Payeur 2021](./papers/payeur2021.pdf) but some modifications have been made for consistency, clarity, or to resolve apparent ambiguities or mistakes.
 
-##### Spikes, bursts, and events
+### Spikes, bursts, and events
 $\overline E_j:$ the rate estimate of neuron $j$. Equivalent to the eligibility trace $\tilde E_j$. (Stuck 2025, p5)
 <br/><br/>
 
@@ -18,7 +18,15 @@ $S_i(t) = \displaystyle\sum_k \delta (t-t_k^{(i)}):$ the event train of neuron $
 - Payeur calls the event train $E_i(t)$ and uses $S_i(t)$ for the spike train. I like that notation better (E is for event, lines up with the eligibility trace and rate estimate) but I'm hesitant to diverge from Stuck's notation.
 <br/><br/>
 
-##### Time constants
+$P_{B+} = \max (0, \tanh(V_d)):$ probability of a positive burst in the signed burst model.
+
+$P_{B-} = \max (0, -\tanh(V_d)):$ probability of a negative burst in the signed burst model.. 
+- Note: Stuck alternatively defines $P_B(\tilde V_d(t) \mid \text{event at }t) = \tanh (|V_d|)$ where the sign of $V_d(t)$ is used to determine its type (positive burst or negative burst).
+
+$B_P = 0.5:$ baseline burst probability in Stuck's model. Payeur's analogue is $\overline P_i$, a nueron's time-averaged burst probability.
+
+
+### Time constants
 $\tau_{\tilde E}:$ the eligibility trace time constant. (Stuck 2025, p5)
 - Stuck 2025 uses 10ms.
 <br/><br/>
@@ -27,15 +35,15 @@ $\tau_d:$ dendritic membrane time constant. (Stuck 2025, p5)
 - Stuck 2025 uses 10ms.
 <br/><br/>
 
-##### Membrane potentials
+### Membrane potentials
 $V_s(t):$ somatic membrane potential. (Stuck 2025)
 <br/><br/>
 
 $\tilde V_s(t) = V_s - \dfrac{E_L}{V_{\text{threshold}} - E_L}:$ dimensionless somatic membrane potential. (Stuck 2025)
 <br/><br/>
 
+### Plasticity Rules
 
-##### Burst probabilities
-
-$P_B:$
-
+#### Payeur's plasticity rule
+Included for reference, we plan to use Stuck's plasticity rules.
+$$\frac{dw_{ij}}{dt} = \eta\,\big[B_i(t) - \overline{P}_i(t)\,E_i(t)\big]\,\tilde{E}_j(t)$$
