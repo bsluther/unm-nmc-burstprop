@@ -34,6 +34,11 @@ Read `docs/norse/` before writing or reviewing Norse code:
 The installed source (`.venv/lib/python3.12/site-packages/norse/`) is the ground truth. Check it when unsure.
 `uv run pytest tests/norse -q` checks the documented behaviour against the pinned version.
 
+## Markdown
+
+Write math in Markdown files as LaTeX (`$\tilde{V}_d$`, `$\eta = 10^{-4}$`, `$$...$$` for display equations), not
+Unicode symbols (Ṽ_d, η = 10⁻⁴). Keep each inline `$...$` on one line.
+
 ## Papers
 
 PDFs are in `docs/papers/`. The Read tool can't render them here (no poppler). Extract the text with
