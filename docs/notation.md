@@ -53,6 +53,11 @@ $\tilde V_s(t) = V_s - \dfrac{E_L}{V_{\text{threshold}} - E_L}:$ dimensionless s
 
 ### Plasticity Rules
 
+#### Stuck's unsigned plasticity rule
+$-\eta \overline...$
+
+#### Stuck's signed plasticity rule
+
 #### Payeur's plasticity rule
 Included for reference, we plan to use Stuck's plasticity rules.
 $$\frac{dw_{ij}}{dt} = \eta\,\big[B_i(t) - \overline{P}_i(t)\,E_i(t)\big]\,\tilde{E}_j(t)$$

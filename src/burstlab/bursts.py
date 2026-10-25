@@ -85,4 +85,4 @@ def sample_signed_bursts(events: Tensor, v_d: Tensor, u: Tensor) -> tuple[Tensor
         A tuple containing the positive burst train and negative burst train.
     """
     p_plus, p_minus = signed_burst_probs(v_d)
-    return (u < p_plus).to(events.dtype) * events, (u < p_minus.to(events.dtype)) * events
+    return (u < p_plus).to(events.dtype) * events, (u < p_minus).to(events.dtype) * events
