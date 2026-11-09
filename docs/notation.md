@@ -52,12 +52,42 @@ $\tilde V_s(t) = V_s - \dfrac{E_L}{V_{\text{threshold}} - E_L}:$ dimensionless s
 <br/><br/>
 
 ### Plasticity Rules
+IMPORTANT NOTE: these are the equations from the paper. In our implementation we flip the sign of Stuck's rules, so a burst potentiates (increases) a weight.
 
 #### Stuck's unsigned plasticity rule
-$-\eta \overline...$
+
+$\dfrac{dw_{ij}}{dt} = -\eta \left[ \hat B_i(t) - \hat B_p S_i(t) \right] \tilde E_j(t)$
 
 #### Stuck's signed plasticity rule
+$\dfrac{dw_{ij}}{dt} = -\eta \left[ \hat B_i^+(t) - \hat B_i^-(t) \right] \tilde E_j(t)$
 
 #### Payeur's plasticity rule
 Included for reference, we plan to use Stuck's plasticity rules.
-$$\frac{dw_{ij}}{dt} = \eta\,\big[B_i(t) - \overline{P}_i(t)\,E_i(t)\big]\,\tilde{E}_j(t)$$
+
+$\dfrac{dw_{ij}}{dt} = \eta \left[B_i(t) - \overline P_i(t) E_i(t)\right] \tilde E_j(t)$
+
+
+#### Plasticity effect of spike vs burst
+
+
+#### Stuck (unsigned)
+
+|                                     | $\hat B_i(t) = 0$<br>$\implies$ No burst                                                        | $\hat B_i(t) = 1$<br>$\implies$ Burst                                                               |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| $S_i(t) = 0$<br>$\implies$ No event | $\dfrac{dw_{ij}}{dt} = -\eta \left[0 - (0.5)(0) \right] \tilde E_j(t) = 0$                      | Impossible - can't have<br>a burst without an event.                                                |
+| $S_i(t) = 1$<br>$\implies$ Event    | $\dfrac{dw_{ij}}{dt} = -\eta \left[0 - (0.5)(1)\right] \tilde E_j(t) = \eta (0.5)\tilde E_j(t)$ | $\dfrac{dw_{ij}}{dt} = -\eta \left[1 - (0.5) (1) \right] \tilde E_j(t) = -\eta (0.5) \tilde E_j(t)$ |
+
+#### Stuck (signed)
+
+| $\hat B_i^+(t)= 0$<br>$\hat B_i^-(t)= 0$<br>$\implies$ No burst      | $\hat B_i^+(t)= 1$<br>$\hat B_i^-(t)= 0$<br>$\implies$ Positive burst                 | $\hat B_i^+(t)= 0$<br>$\hat B_i^-(t)= 1$<br>$\implies$ Negative burst                 |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| $\dfrac{dw_{ij}}{dt} = -\eta \left[ 0 - 0 \right] \tilde E_j(t) = 0$ | $\dfrac{dw_{ij}}{dt} = -\eta \left[ 1 - 0\right] \tilde E_j(t) = -\eta \tilde E_j(t)$ | $\dfrac{dw_{ij}}{dt} = -\eta \left[ 0 - 1 \right] \tilde E_j(t) = \eta \tilde E_j(t)$ |
+
+
+
+
+
+
+
+
+
