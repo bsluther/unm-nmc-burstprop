@@ -125,7 +125,7 @@ def dimensionless_current(i_s: Tensor, g_l: float, e_l: float, v_threshold: floa
       - Sanity check: a constant I~_s = 1 drives V~_s towards exactly threshold (eq. 3 at steady state), so it is
         the smallest constant input that can make the neuron fire.
     """
-    #Ok so here the current input current is set to the input current div by the leak conductance
+    #Ok so here the current input current is set to the old input current div by the leak conductance
     #times the volt threshold minus the resting potenial (alot of currents here)
     
     return i_s / (g_l * (v_threshold - e_l))
@@ -252,9 +252,13 @@ def somatic_input(events_pre: Tensor, weights: Tensor, dt: float) -> Tensor:
           (c) scale so a spike is a jump of w:    multiply by tau_s / dt, giving dv = w
         Pick one, write it down here and in the replication notes, and test it.
     """
-    #This was the most confusing on for me gonna have to come back and look at this one
+    #This was the most confusing one for me gonna have to come back and look at this one
     #Claude told me that events_pre @ weights.T is the sum of the weights of the inputs that spiked
+    #So this is ∑(w_ij * S_j(t)) for one timestep
+    
     #NOTE: here I choice option b
+    
+    #w_ij represents the is the feedforward synaptic weight from lower-order neuron j to higher-order neuron i
     i_tilde = (events_pre @ weights.T) / dt
     return i_tilde
     
