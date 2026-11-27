@@ -62,6 +62,7 @@ order the skeleton assumes. Check it against gotchas G5 and dendrite.py's module
 from typing import NamedTuple
 
 import torch  # noqa: F401  (for the implementations: torch.where, torch.full_like, torch.nn.functional.one_hot ...)
+from burstlab import traces
 from torch import Tensor
 
 
@@ -109,7 +110,7 @@ def initial_rate_state(like: Tensor) -> RateState:
       - Starting from 0 Hz means every output unit begins "below target", so at t = 0 the teaching signal is
         positive for all outputs (+2 * gamma_T * Ê_i). That transient is expected. Look for it in plots.
     """
-    return RateState(rate = torch.zero_like(like))
+    return RateState(rate = torch.zeros_like(like))
 
 
 # --- Rate estimate Ē (§3.4.1: "the same time constant as for the eligibility trace") ---------------------------
@@ -133,7 +134,9 @@ def rate_estimate_step(
         gives Ē around 50, with a lot of noise because tau is only 10 ms).
       - Return a fresh RateState(rate=...) rather than modifying state.rate in place.
     """
-    return traces.trace_step(state.rate, events, dt, p.tau)
+    #Here im calling trace_step from traces.py for the new rate
+    rate = traces.trace_step(state.rate, events, dt, p.tau)
+    return (rate, RateState(rate = rate))
 
 
 # --- Target rates Ê (§3.4.1 and §3.4.2) ------------------------------------------------------------------------
@@ -151,7 +154,11 @@ def output_target_rates(labels: Tensor, n_classes: int, rate_high: float, rate_l
       - Compute this once per sample, not every step: the label doesn't change within a sample.
       - Sanity check: each row sums to rate_high + (n_classes - 1) * rate_low (200 + 9 * 20 = 380 Hz for MNIST).
     """
-    raise NotImplementedError
+    
+    mask = torch.nn.functional.one_hot(labels, n_classes)
+    otr = rate_low + (rate_high - rate_low) * mask
+    return otr
+    
 
 
 def hidden_target_rates(like: Tensor, rate_hidden: float) -> Tensor:
@@ -162,7 +169,7 @@ def hidden_target_rates(like: Tensor, rate_hidden: float) -> Tensor:
       - It's a constant, so you could pass the float straight into regularisation_signal and let broadcasting do
         the work. A tensor-returning helper just keeps the output and hidden code paths looking the same.
     """
-    raise NotImplementedError
+    return torch.full_like(like, rate_hidden)
 
 
 # --- Squared-error losses (the eps_T and eps_R that eqs. 9-10 differentiate) -----------------------------------
@@ -180,8 +187,9 @@ def squared_error(rate: Tensor, target: Tensor) -> Tensor:
       - Check with torch.autograd.grad on a small tensor with requires_grad=True. That's the one place autograd
         appears near this code: Burstprop itself learns locally, without it.
     """
-    raise NotImplementedError
-
+    
+    sqError = (target - rate) ** 2
+    return sqError
 
 # --- Eq. 9: teaching signal for the output layer ---------------------------------------------------------------
 def teaching_signal(rate: Tensor, target: Tensor, gamma_t: float) -> Tensor:
@@ -201,7 +209,9 @@ def teaching_signal(rate: Tensor, target: Tensor, gamma_t: float) -> Tensor:
         there's no "teacher off, then teacher on" phase to build here.
       - At test time (§3.9.2), don't call this: the output dendrites get zeros.
     """
-    raise NotImplementedError
+    #Here just recreating eq 9 from the Stuck paper
+    t_i = 2 * gamma_t * (target - rate)
+    return t_i
 
 
 # --- Eq. 10: regularisation signal for hidden layers -----------------------------------------------------------
@@ -222,7 +232,8 @@ def regularisation_signal(rate: Tensor, target: Tensor | float, gamma_r: float) 
         typical T. That's the intent (gamma_R << gamma_T). If R ever dominates I_FB, check the units of Ē first.
       - Not applied to input units (no dendrites) or output units (they get T, eq. 11).
     """
-    raise NotImplementedError
+    r_i = 2 * gamma_r * (target - rate)
+    return r_i
 
 
 # --- Output-layer step: rate estimate + eq. 9, Norse-style signature -------------------------------------------
@@ -245,8 +256,12 @@ def teacher_step(
         will show up in exact-match tests.
       - Return a fresh RateState rather than modifying state.rate in place.
     """
-    raise NotImplementedError
-
+    #Calling the teaching signal to get the teaching sig
+    #rate estimate step gets the new rate
+    
+    t_i = teaching_signal(state.rate, target, p.gamma_t)
+    _, new_state = rate_estimate_step(events_out, state, p, dt)
+    return (t_i, new_state)
 
 # --- Hidden-layer step: rate estimate + eq. 10, Norse-style signature ------------------------------------------
 def regulariser_step(
@@ -264,4 +279,8 @@ def regulariser_step(
       - One RateState per hidden layer. With 4 hidden layers you'll have 4 of these plus one for the output.
       - Same one-step-delay choice as teacher_step: keep the two consistent.
     """
-    raise NotImplementedError
+    #calling the regularisation signal to get new regSig
+    #Again rate estimate step for the new state
+    regSig = regularisation_signal(state.rate, p.rate_hidden, p.gamma_r)
+    _, new_state = rate_estimate_step(events_hidden, state, p, dt)
+    return (regSig, new_state)
